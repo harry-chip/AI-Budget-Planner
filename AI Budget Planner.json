@@ -1,0 +1,308 @@
+{
+  "name": "AI Budget Planner",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Budget Planner",
+        "formDescription": "An AI Budget Planner that analyzes your monthly income and expenses, calculates your savings, and suggests a personalized budget to help you manage money and achieve your financial goals.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name "
+            },
+            {
+              "fieldLabel": "Monthly Income",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Currency",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "PKR"
+                  },
+                  {
+                    "option": "USD"
+                  },
+                  {
+                    "option": "CNY"
+                  },
+                  {
+                    "option": "INR"
+                  },
+                  {
+                    "option": "EUR"
+                  },
+                  {
+                    "option": "SGD"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Rent / Housing",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Food Expenses",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Transport Expenses",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Bills & Utilities",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Other Expenses",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Monthly Savings Goal",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "1459b76c-4500-4d72-afb3-191025c8e3cb",
+      "name": "AI Budget Planner",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -432,
+        -96
+      ],
+      "webhookId": "23da8dbd-8d1a-4831-9e0a-1b234d49c970"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a personalized monthly budget using these details:\n\nName: {{ $json['Name '] }}\nMonthly Income: {{ $json[\"Monthly Income\"] }}\nCurrency: {{ $json.Currency }}\nRent / Housing: {{ $json[\"Rent / Housing\"] }}\nFood Expenses: {{ $json[\"Food Expenses\"] }}\nTransport Expenses: {{ $json[\"Transport Expenses\"] }}\nBills & Utilities: {{ $json[\"Bills & Utilities\"] }}\nOther Expenses: {{ $json[\"Other Expenses\"] }}\nMonthly Savings Goal: {{ $json[\"Monthly Savings Goal\"] }}\n\nCalculate total expenses, remaining balance, savings rate, and the difference between the remaining balance and savings goal.\n\nSuggest a realistic spending plan and practical ways to save money. Do not assume missing values are zero unless the user explicitly enters zero.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a professional AI Budget Planner.\n\nYour job is to analyze a user's monthly income, expenses, and savings goal and create a practical monthly budget.\n\nInstructions:\n1. Calculate total monthly expenses.\n2. Calculate remaining money = monthly income - total expenses.\n3. Calculate the savings rate as a percentage of monthly income, if income is greater than zero.\n4. Compare the remaining money with the user's savings goal.\n5. Suggest realistic ways to reduce unnecessary expenses.\n6. Create a recommended budget for the next month.\n7. Use the currency provided by the user.\n8. Never invent financial information or change the user's numbers.\n9. If required inputs are missing, negative, or invalid, ask for clarification instead of making assumptions.\n10. If expenses exceed income, clearly explain the shortfall and suggest practical adjustments.\n11. Do not guarantee financial results or recommend risky investments.\n\nReturn the result according to the Structured Output Parser schema. Include calculated totals, a spending analysis, savings recommendations, and a recommended budget."
+        }
+      },
+      "id": "58de4e77-4104-4ed7-b358-428736e00710",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -112,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "04e9ce80-e339-47b5-aee6-fd94d52f2596",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -128,
+        112
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zrFQsgF2W6p6g6xB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"currency\":{\"type\":\"string\"},\"monthly_income\":{\"type\":\"number\"},\"total_expenses\":{\"type\":\"number\"},\"remaining_balance\":{\"type\":\"number\"},\"savings_rate_percent\":{\"type\":\"number\"},\"savings_goal\":{\"type\":\"number\"},\"savings_goal_difference\":{\"type\":\"number\"},\"spending_analysis\":{\"type\":\"string\"},\"savings_recommendations\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"recommended_budget\":{\"type\":\"object\",\"properties\":{\"housing\":{\"type\":\"number\"},\"food\":{\"type\":\"number\"},\"transport\":{\"type\":\"number\"},\"bills_utilities\":{\"type\":\"number\"},\"other\":{\"type\":\"number\"},\"savings\":{\"type\":\"number\"}}}},\"required\":[\"total_expenses\",\"remaining_balance\",\"savings_rate_percent\",\"spending_analysis\",\"savings_recommendations\",\"recommended_budget\"]}"
+      },
+      "id": "fb4b1fa6-e20e-49f9-a3ac-131082321d98",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "Name",
+              "type": "string",
+              "value": "={{ $json.output.name }}"
+            },
+            {
+              "id": "a2",
+              "name": "Currency",
+              "type": "string",
+              "value": "={{ $json.output.currency }}"
+            },
+            {
+              "id": "a3",
+              "name": "Monthly Income",
+              "type": "number",
+              "value": "={{ $json.output.monthly_income }}"
+            },
+            {
+              "id": "a4",
+              "name": "Total Expenses",
+              "type": "number",
+              "value": "={{ $json.output.total_expenses }}"
+            },
+            {
+              "id": "a5",
+              "name": "Remaining Balance",
+              "type": "number",
+              "value": "={{ $json.output.remaining_balance }}"
+            },
+            {
+              "id": "a6",
+              "name": "Savings Rate",
+              "type": "string",
+              "value": "={{ $json.output.savings_rate_percent }}%"
+            },
+            {
+              "id": "a7",
+              "name": "Savings Goal Difference",
+              "type": "number",
+              "value": "={{ $json.output.savings_goal_difference }}"
+            },
+            {
+              "id": "a8",
+              "name": "Spending Analysis",
+              "type": "string",
+              "value": "={{ $json.output.spending_analysis }}"
+            },
+            {
+              "id": "a9",
+              "name": "Savings Recommendations",
+              "type": "string",
+              "value": "={{ $json.output.savings_recommendations.map((r, i) => (i + 1) + \". \" + r).join(\"\\n\") }}"
+            },
+            {
+              "id": "a10",
+              "name": "Recommended Budget",
+              "type": "object",
+              "value": "={{ $json.output.recommended_budget }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2c1f7d1f-0ed9-4dcb-8dba-bf2a13fb080c",
+      "name": "Format Budget Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        208,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "=Your Budget Plan, {{ $json.Name }}",
+        "completionMessage": "=Total expenses: {{ $json[\"Total Expenses\"] }} {{ $json.Currency }}\nRemaining balance: {{ $json[\"Remaining Balance\"] }} {{ $json.Currency }}\nSavings rate: {{ $json[\"Savings Rate\"] }}\n\n{{ $json[\"Spending Analysis\"] }}\n\nSavings recommendations:\n{{ $json[\"Savings Recommendations\"] }}",
+        "options": {}
+      },
+      "id": "c6547856-f2cc-406f-9648-fdac2ad75a7d",
+      "name": "Form Ending",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        336,
+        48
+      ],
+      "webhookId": "0a525919-0f29-4f22-b034-f42f4036da76"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Budget Planner": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Budget Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Budget Output": {
+      "main": [
+        [
+          {
+            "node": "Form Ending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "efd4e060-7f6f-42d8-a6fe-10a1777af2d3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd5f8d12e3f25c9c62226a7431fd7005631837f2825adf9a14aa8343b7a1c927"
+  },
+  "nodeGroups": [],
+  "id": "zZm6i43cQr6XRzE3",
+  "tags": []
+}
